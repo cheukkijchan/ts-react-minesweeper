@@ -1,6 +1,6 @@
 import React, { createContext } from 'react';
-import { createBoard } from '../utils/logic';
 
+import { createBoard } from '../utils/createBoard';
 import { Tile } from './Tile';
 
 interface TileContainerProps {
@@ -16,24 +16,21 @@ export const TileContainer: React.FC<TileContainerProps> = ({
   boardSize,
   numberOfMine,
 }) => {
-  // create board, board status and context api
-  const { board, defaultBoardStatus } = createBoard(boardSize, numberOfMine);
-
+  const board = createBoard(boardSize, boardSize, numberOfMine);
   return (
     <div className='board'>
-      <BoardStatusContext.Provider value={defaultBoardStatus}>
-        {board.map((row, rowId) => {
-          const x = row[rowId].x;
-          return (
-            <div className='row' key={rowId}>
-              {row.map((col, colId) => {
-                const position = { x, y: col.y };
-                return <Tile key={colId} mine={col.mine} position={position} />;
-              })}
-            </div>
-          );
-        })}
-      </BoardStatusContext.Provider>
+      {board.map((row, rowId) => {
+        return (
+          <div className='row' key={rowId}>
+            {row.map((col, colId) => {
+              let value = JSON.stringify(col);
+              if (typeof col === 'string') value = col;
+
+              return <Tile key={colId} value={value}></Tile>;
+            })}
+          </div>
+        );
+      })}
     </div>
   );
 };
