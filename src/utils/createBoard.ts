@@ -57,7 +57,10 @@ const randomNumber = (size: number) => {
 };
 
 // compute nearby tile
-const computeNearbyPosition = (board: TileType[][], position: PositionType) => {
+const createNumberAroundMine = (
+  board: TileType[][],
+  position: PositionType
+) => {
   const positions: PositionType[] = [];
   const { i, j } = position;
   // not top and bottom row
@@ -66,7 +69,7 @@ const computeNearbyPosition = (board: TileType[][], position: PositionType) => {
   for (let a of iList) {
     if (board[a]) {
       for (let b of jList) {
-        if (board[a][b] !== undefined && board[a][b] !== 'mine') {
+        if (board[a][b] !== undefined && board[a][b] !== '💣') {
           // set cell from null to 0
           if (typeof board[a][b] !== 'number') {
             board[a][b] = 0;
@@ -102,12 +105,44 @@ export const createBoard = (
 
   minePositons.forEach((minePositon) => {
     // populate mine position to board matrx
-    populateNestedArray(board, minePositon, 'mine');
+    populateNestedArray(board, minePositon, '💣');
     // assign number to adjacent cell next to mine
-    const numberPosition = computeNearbyPosition(board, minePositon);
-    console.log(numberPosition);
+    const numberPosition = createNumberAroundMine(board, minePositon);
     tileValuePlusOne(board, numberPosition);
   });
 
   return board;
+};
+
+// export const createBoardStatus = (row: number, col: number) => {
+//   const boardStatus = createNestedArray<tileStatus>(row, col);
+//   for (let i = 0; i < row; i++) {
+//     for (let j = 0; j < col; j++) {
+//       boardStatus[i][j] = 'hidden';
+//     }
+//   }
+//   return boardStatus;
+// };
+
+export const getNearbyPositions = (
+  board: TileType[][],
+  position: PositionType
+) => {
+  // compute nearby tile
+  const positions: PositionType[] = [];
+  const { i, j } = position;
+  // not top and bottom row
+  let iList = [i - 1, i, i + 1];
+  let jList = [j - 1, j, j + 1];
+  for (let a of iList) {
+    if (board[a]) {
+      for (let b of jList) {
+        if (board[a][b] !== undefined) {
+          positions.push({ i: a, j: b });
+        }
+      }
+    }
+  }
+
+  return positions;
 };

@@ -1,48 +1,97 @@
-import React, { useState } from 'react';
-import { TileType } from '../utils/createBoard';
+import React, { useEffect, useState } from 'react';
+import { getNearbyPositions, TileType } from '../utils/createBoard';
+
 interface TileProps {
-  value: TileType;
+  row: number;
+  col: number;
+  board: TileType[][];
+  clickCount: () => void;
+  onMark: (value: number) => void;
 }
 
-type tileStatus = 'hidden' | 'number' | 'marked' | 'mine';
+export type TileStatusType = 'hidden' | '🏁' | 'reveal' | '💣';
 
-export const Tile: React.FC<TileProps> = ({ value }) => {
-  const [tileStatus, setTileStatus] = useState<tileStatus>('hidden');
+export const Tile: React.FC<TileProps> = ({
+  row,
+  col,
+  board,
+  clickCount,
+  onMark,
+}) => {
+  const [tileStatus, setTileStatus] = useState<TileStatusType>('hidden');
 
-  // handle click
-  function handleMark(e: React.MouseEvent<Element, MouseEvent>) {
+  useEffect(() => {
+    setTileStatus('hidden');
+  }, [board]);
+
+  // handle mark
+  const handleMark = (e: React.MouseEvent<Element, MouseEvent>) => {
     e.preventDefault();
+    if (tileStatus === 'reveal') {
+      return console.log('revealed');
+    }
     // mark
-    if (tileStatus !== 'marked') {
-      setTileStatus('marked');
+    if (tileStatus !== '🏁') {
+      setTileStatus('🏁');
+      onMark(1);
     }
     // un-mark
-    if (tileStatus === 'marked') {
+    if (tileStatus === '🏁') {
       setTileStatus('hidden');
+      onMark(-1);
     }
-  }
+  };
 
-  function checkMine(value: TileType) {
-    if (value === 'mine') {
-      setTileStatus('mine');
-      setTimeout(() => {
-        alert('you lose');
-      }, 100);
-    }
-  }
+  // reset Board
+  // const setToHidden = () => {
+  //   setTileStatus('hidden');
+  // };
 
-  const handleReveal = (e: React.MouseEvent<Element, MouseEvent>) => {
+  // handle click
+  const handleClick = (e: React.MouseEvent<Element, MouseEvent>) => {
     e.preventDefault();
-    checkMine(value);
+    if (tileStatus === 'reveal') {
+      return console.log('clicked');
+    }
+
+    if (tileStatus === 'hidden') {
+      clickCount();
+      // Mine Click
+      if (board[row][col] === '💣') {
+        setTileStatus('💣');
+        setTimeout(() => {
+          alert('you lose');
+        }, 100);
+      } else if (board[row][col] === '') {
+        const nearbyTiles = getNearbyPositions(board, { i: row, j: col });
+        nearbyTiles.forEach((tile) => {
+          const target = document.getElementById(`${tile.i}_${tile.j}`);
+          setImmediate(() => {
+            if (target) {
+              target?.click();
+            }
+          });
+        });
+        setTileStatus('reveal');
+      } else {
+        setTileStatus('reveal');
+      }
+    }
   };
 
   return (
-    <div
+    <td
       className={`tile ${tileStatus}`}
+      style={{ border: '1px solid black' }}
       onContextMenu={handleMark}
-      onClick={handleReveal}
+      onClick={handleClick}
+      id={`${row}_${col}`}
     >
-      {value}
-    </div>
+      {tileStatus === 'hidden'
+        ? ''
+        : tileStatus === '🏁'
+        ? tileStatus
+        : board[row][col]}
+    </td>
   );
 };
