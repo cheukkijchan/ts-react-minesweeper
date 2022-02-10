@@ -3,7 +3,7 @@
 ## About this Project
 ![React-minesweeper](https://user-images.githubusercontent.com/48294756/153354667-13402769-248b-403e-b27b-84be40f5d09e.png)
 
-A minesweeper minigame
+A simple minesweeper minigame
 
 ### Built with
 
